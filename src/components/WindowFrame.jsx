@@ -35,25 +35,28 @@ const WindowFrame = ({ windowItem }) => {
           onStop={(e, data) => updateWindowPosition(id, { x: data.x, y: data.y })}
           nodeRef={nodeRef}
           bounds="parent"
+          disabled={isMaximized}
         >
-          <motion.div
+          <div
             ref={nodeRef}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            variants={variants}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className={`absolute rounded-xl overflow-hidden shadow-mac-window backdrop-blur-xl border border-white/20 flex flex-col ${darkMode ? 'bg-gray-800' : 'bg-mac-window'}`}
+            className="absolute"
             style={{
               width: isMaximized ? '100%' : size.width,
               height: isMaximized ? '100%' : size.height,
               zIndex: zIndex,
-              left: isMaximized ? 0 : undefined, // Override draggable position if maximized
+              left: isMaximized ? 0 : undefined,
               top: isMaximized ? 0 : undefined,
-              transform: isMaximized ? 'none !important' : undefined, // Force transform reset if maximized (tricky with draggable)
             }}
             onMouseDown={handleFocus}
           >
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              variants={variants}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className={`w-full h-full rounded-xl overflow-hidden shadow-mac-window backdrop-blur-xl border border-white/20 flex flex-col ${darkMode ? 'bg-gray-800' : 'bg-mac-window'}`}
+            >
             {/* Window Header */}
             <div className={`window-header h-10 border-b border-gray-300/30 flex items-center px-4 space-x-2 select-none cursor-grab active:cursor-grabbing ${darkMode ? 'bg-gray-700/50' : 'bg-gray-200/50'}`}>
               <div className="flex space-x-2 group">
@@ -89,6 +92,7 @@ const WindowFrame = ({ windowItem }) => {
               </div>
             </div>
           </motion.div>
+          </div>
         </Draggable>
       )}
     </AnimatePresence>
