@@ -2,7 +2,8 @@ import Terminal from '../apps/Terminal';
 import Notepad from '../apps/Notepad';
 import Calculator from '../apps/Calculator';
 import Safari from '../apps/Safari';
-import { TerminalSquare, StickyNote, Calculator as CalcIcon, Globe, FolderOpen } from 'lucide-react';
+import HelloApp from '../apps/HelloApp';
+import { TerminalSquare, StickyNote, Calculator as CalcIcon, Globe, FolderOpen, Smile } from 'lucide-react';
 
 export const apps = {
   terminal: {
@@ -32,6 +33,13 @@ export const apps = {
     icon: Globe,
     component: Safari,
     defaultSize: { width: 1024, height: 768 }
+  },
+  hello: {
+    id: 'hello',
+    title: 'HelloApp',
+    icon: Smile,
+    component: HelloApp,
+    defaultSize: { width: 400, height: 300 }
   },
   finder: {
     id: 'finder',

@@ -41,8 +41,14 @@ const Calculator = () => {
       setDisplay(String(newValue));
     }
 
-    setWaitingForOperand(true);
-    setOperator(nextOperator);
+    // If equals pressed, compute and clear operator
+    if (nextOperator === '=') {
+      setOperator(null);
+      setWaitingForOperand(true);
+    } else {
+      setWaitingForOperand(true);
+      setOperator(nextOperator);
+    }
   };
 
   const calculate = (prev, next, op) => {
@@ -66,7 +72,7 @@ const Calculator = () => {
 
   return (
     <div className="h-full w-full bg-black text-white flex flex-col p-4 select-none">
-      <div className="flex-1 flex items-end justify-end text-6xl font-light px-2 mb-4 truncate">
+      <div className="flex-1 flex items-end justify-end text-6xl font-light px-2 mb-4 truncate" role="status" aria-live="polite">
         {display}
       </div>
       <div className="grid grid-cols-4 gap-3">

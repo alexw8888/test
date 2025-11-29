@@ -10,9 +10,9 @@ const Desktop = () => {
   return (
     <div 
       className="relative w-screen h-screen overflow-hidden bg-cover bg-center font-sans"
-      style={{ 
-        backgroundImage: 'url("https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop")',
-        backgroundColor: '#2d3436' 
+      style={{
+        // Deep blue gradient background
+        background: 'linear-gradient(135deg, #00121a 0%, #002b54 50%, #003b7a 100%)',
       }}
     >
       {/* Overlay to darken/tint if needed */}

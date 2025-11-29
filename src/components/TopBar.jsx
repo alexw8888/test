@@ -6,7 +6,7 @@ import { apps } from '../utils/appRegistry';
 
 const TopBar = () => {
   const [date, setDate] = useState(new Date());
-  const { activeWindowId, windows } = useOSStore();
+  const { activeWindowId, windows, darkMode, toggleDarkMode } = useOSStore();
   
   const activeWindow = windows.find(w => w.id === activeWindowId);
   const activeAppName = activeWindow ? apps[activeWindow.appId]?.title : 'Finder';
@@ -17,8 +17,8 @@ const TopBar = () => {
   }, []);
 
   return (
-    <div className="fixed top-0 left-0 right-0 h-8 bg-mac-window/50 backdrop-blur-md flex items-center justify-between px-4 z-[10000] text-xs font-medium select-none border-b border-white/10 text-gray-800 dark:text-white">
-      <div className="flex items-center space-x-4">
+    <div className="fixed top-0 left-0 right-0 h-9 bg-mac-window/50 backdrop-blur-md flex items-center justify-between px-4 z-[10000] text-xs font-medium select-none border-b border-white/10 text-gray-800 dark:text-white">
+  <div className="flex items-center space-x-4">
         <div className="hover:bg-white/20 p-1 rounded cursor-pointer">
           <Apple size={16} />
         </div>
@@ -33,7 +33,7 @@ const TopBar = () => {
         </div>
       </div>
 
-      <div className="flex items-center space-x-4">
+  <div className="flex items-center space-x-4">
          <div className="hover:bg-white/20 p-1 rounded cursor-pointer">
             <Battery size={18} />
          </div>
@@ -49,6 +49,14 @@ const TopBar = () => {
          <div className="hover:bg-white/20 px-2 py-1 rounded cursor-pointer min-w-[130px] text-center">
             {format(date, 'EEE MMM d h:mm aa')}
          </div>
+        {/* Dark mode toggle */}
+        <button
+          onClick={() => toggleDarkMode && toggleDarkMode()}
+          className={`ml-2 p-1 rounded-full border ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}
+          title="Toggle Dark Mode"
+        >
+          {darkMode ? '🌙' : '☀️'}
+        </button>
       </div>
     </div>
   );
