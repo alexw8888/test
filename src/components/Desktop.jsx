@@ -11,8 +11,8 @@ const Desktop = () => {
     <div 
       className="relative w-screen h-screen overflow-hidden bg-cover bg-center font-sans"
       style={{ 
-        backgroundImage: 'url("https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop")',
-        backgroundColor: '#2d3436' 
+        backgroundImage: 'linear-gradient(to bottom right, #000428, #004e92)',
+        backgroundColor: '#000428' 
       }}
     >
       {/* Overlay to darken/tint if needed */}

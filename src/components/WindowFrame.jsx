@@ -7,7 +7,7 @@ import { apps } from '../utils/appRegistry';
 
 const WindowFrame = ({ windowItem }) => {
   const { id, appId, isMinimized, isMaximized, zIndex, position, size } = windowItem;
-  const { focusWindow, closeWindow, minimizeWindow, maximizeWindow, updateWindowPosition } = useOSStore();
+  const { focusWindow, closeWindow, minimizeWindow, maximizeWindow, updateWindowPosition, isDarkMode } = useOSStore();
   const nodeRef = useRef(null);
 
   const appConfig = apps[appId];
@@ -36,59 +36,70 @@ const WindowFrame = ({ windowItem }) => {
           nodeRef={nodeRef}
           bounds="parent"
         >
-          <motion.div
+          <div
             ref={nodeRef}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            variants={variants}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="absolute rounded-xl overflow-hidden shadow-mac-window bg-mac-window backdrop-blur-xl border border-white/20 flex flex-col"
+            className="absolute flex flex-col"
             style={{
               width: isMaximized ? '100%' : size.width,
               height: isMaximized ? '100%' : size.height,
               zIndex: zIndex,
-              left: isMaximized ? 0 : undefined, // Override draggable position if maximized
+              left: isMaximized ? 0 : undefined,
               top: isMaximized ? 0 : undefined,
-              transform: isMaximized ? 'none !important' : undefined, // Force transform reset if maximized (tricky with draggable)
             }}
             onMouseDown={handleFocus}
           >
-            {/* Window Header */}
-            <div className="window-header h-10 bg-gray-200/50 border-b border-gray-300/30 flex items-center px-4 space-x-2 select-none cursor-default">
-              <div className="flex space-x-2 group">
-                <button 
-                  onClick={(e) => { e.stopPropagation(); closeWindow(id); }}
-                  className="w-3 h-3 rounded-full bg-red-500 flex items-center justify-center hover:brightness-90 active:brightness-75"
-                >
-                  <X size={8} className="opacity-0 group-hover:opacity-100 text-black/60" />
-                </button>
-                <button 
-                  onClick={(e) => { e.stopPropagation(); minimizeWindow(id); }}
-                  className="w-3 h-3 rounded-full bg-yellow-500 flex items-center justify-center hover:brightness-90 active:brightness-75"
-                >
-                  <Minus size={8} className="opacity-0 group-hover:opacity-100 text-black/60" />
-                </button>
-                <button 
-                  onClick={(e) => { e.stopPropagation(); maximizeWindow(id); }}
-                  className="w-3 h-3 rounded-full bg-green-500 flex items-center justify-center hover:brightness-90 active:brightness-75"
-                >
-                  <Maximize2 size={8} className="opacity-0 group-hover:opacity-100 text-black/60" />
-                </button>
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              variants={variants}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className={`w-full h-full rounded-xl overflow-hidden shadow-mac-window backdrop-blur-xl border flex flex-col transition-colors duration-200 ${
+                isDarkMode 
+                  ? 'bg-gray-900/90 border-gray-700' 
+                  : 'bg-mac-window border-white/20'
+              }`}
+            >
+              {/* Window Header */}
+              <div className={`window-header h-10 border-b flex items-center px-4 space-x-2 select-none cursor-default transition-colors duration-200 ${
+                isDarkMode 
+                  ? 'bg-gray-800 border-gray-700' 
+                  : 'bg-gray-200/50 border-gray-300/30'
+              }`}>
+                <div className="flex space-x-2 group">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); closeWindow(id); }}
+                    className="w-3 h-3 rounded-full bg-red-500 flex items-center justify-center hover:brightness-90 active:brightness-75"
+                  >
+                    <X size={8} className="opacity-0 group-hover:opacity-100 text-black/60" />
+                  </button>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); minimizeWindow(id); }}
+                    className="w-3 h-3 rounded-full bg-yellow-500 flex items-center justify-center hover:brightness-90 active:brightness-75"
+                  >
+                    <Minus size={8} className="opacity-0 group-hover:opacity-100 text-black/60" />
+                  </button>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); maximizeWindow(id); }}
+                    className="w-3 h-3 rounded-full bg-green-500 flex items-center justify-center hover:brightness-90 active:brightness-75"
+                  >
+                    <Maximize2 size={8} className="opacity-0 group-hover:opacity-100 text-black/60" />
+                  </button>
+                </div>
+                <div className={`flex-1 text-center text-sm font-medium opacity-80 ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+                  {appConfig.title}
+                </div>
+                <div className="w-14"></div> {/* Spacer for centering title */}
               </div>
-              <div className="flex-1 text-center text-sm font-medium text-gray-700 opacity-80">
-                {appConfig.title}
-              </div>
-              <div className="w-14"></div> {/* Spacer for centering title */}
-            </div>
 
-            {/* Window Content */}
-            <div className="flex-1 relative overflow-hidden">
-              <div className="absolute inset-0 overflow-auto">
-                <AppComponent />
+              {/* Window Content */}
+              <div className="flex-1 relative overflow-hidden">
+                <div className="absolute inset-0 overflow-auto">
+                  <AppComponent />
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </Draggable>
       )}
     </AnimatePresence>

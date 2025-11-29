@@ -3,57 +3,51 @@ import { create } from 'zustand';
 export const useOSStore = create((set, get) => ({
   activeWindowId: null,
   windows: [],
-  zIndexCounter: 100, // Starting z-index
+  isDarkMode: false,
 
-  // Actions
+  toggleDarkMode: () => set((state) => ({ isDarkMode: !state.isDarkMode })),
+
   openApp: (appId) => {
-    const { windows, zIndexCounter } = get();
-    
-    // Check if window is already open
+    const { windows } = get();
     const existingWindow = windows.find((w) => w.appId === appId);
     
     if (existingWindow) {
-      // If minimized, restore it. If just background, bring to front.
-      set({
-        activeWindowId: existingWindow.id,
-        zIndexCounter: zIndexCounter + 1,
-        windows: windows.map((w) => 
-          w.id === existingWindow.id 
-            ? { ...w, isMinimized: false, zIndex: zIndexCounter + 1 }
-            : w
-        ),
-      });
-    } else {
-      // Open new window
-      const newWindow = {
-        id: Date.now().toString(),
-        appId,
-        title: appId, // Will be enriched by the UI layer
-        zIndex: zIndexCounter + 1,
-        isMinimized: false,
-        isMaximized: false,
-        position: { x: 100 + (windows.length * 20), y: 50 + (windows.length * 20) }, // Cascade effect
-        size: { width: 600, height: 400 },
-      };
-
-      set({
-        activeWindowId: newWindow.id,
-        zIndexCounter: zIndexCounter + 1,
-        windows: [...windows, newWindow],
-      });
+      get().focusWindow(existingWindow.id);
+      return;
     }
+
+    const newWindow = {
+      id: Date.now().toString(),
+      appId,
+      title: appId, 
+      zIndex: 100 + windows.length, 
+      isMinimized: false,
+      isMaximized: false,
+      position: { x: 100 + (windows.length * 20), y: 50 + (windows.length * 20) },
+      size: { width: 600, height: 400 },
+    };
+
+    const newWindows = [...windows, newWindow];
+    
+    set({
+      activeWindowId: newWindow.id,
+      windows: newWindows.map((w, i) => ({ ...w, zIndex: 100 + i })),
+    });
   },
 
   closeWindow: (id) => {
-    set((state) => ({
-      windows: state.windows.filter((w) => w.id !== id),
-      activeWindowId: state.activeWindowId === id ? null : state.activeWindowId,
-    }));
+    set((state) => {
+        const remaining = state.windows.filter((w) => w.id !== id);
+        return {
+            windows: remaining, 
+            activeWindowId: state.activeWindowId === id ? null : state.activeWindowId,
+        };
+    });
   },
 
   minimizeWindow: (id) => {
     set((state) => ({
-      activeWindowId: null, // Deselect when minimizing
+      activeWindowId: null,
       windows: state.windows.map((w) =>
         w.id === id ? { ...w, isMinimized: true } : w
       ),
@@ -61,25 +55,39 @@ export const useOSStore = create((set, get) => ({
   },
 
   maximizeWindow: (id) => {
-     set((state) => ({
-      activeWindowId: id,
-      zIndexCounter: state.zIndexCounter + 1,
-      windows: state.windows.map((w) =>
-        w.id === id 
-          ? { ...w, isMaximized: !w.isMaximized, zIndex: state.zIndexCounter + 1 } 
-          : w
-      ),
-    }));
+    const { windows } = get();
+    const windowToMax = windows.find(w => w.id === id);
+    if (!windowToMax) return;
+    
+    const otherWindows = windows.filter(w => w.id !== id);
+    const newOrder = [...otherWindows, windowToMax];
+    
+    set({
+        activeWindowId: id,
+        windows: newOrder.map((w, i) => ({ 
+            ...w, 
+            zIndex: 100 + i, 
+            isMaximized: w.id === id ? !w.isMaximized : w.isMaximized 
+        }))
+    });
   },
 
   focusWindow: (id) => {
-    set((state) => ({
+    const { windows } = get();
+    const windowToFocus = windows.find(w => w.id === id);
+    if (!windowToFocus) return;
+
+    const otherWindows = windows.filter(w => w.id !== id);
+    const newOrder = [...otherWindows, windowToFocus];
+
+    set({
       activeWindowId: id,
-      zIndexCounter: state.zIndexCounter + 1,
-      windows: state.windows.map((w) =>
-        w.id === id ? { ...w, zIndex: state.zIndexCounter + 1, isMinimized: false } : w
-      ),
-    }));
+      windows: newOrder.map((w, i) => ({ 
+        ...w, 
+        zIndex: 100 + i, 
+        isMinimized: false 
+      })),
+    });
   },
 
   updateWindowPosition: (id, position) => {
