@@ -65,8 +65,8 @@ const Calculator = () => {
   );
 
   return (
-    <div className="h-full w-full bg-black text-white flex flex-col p-4 select-none">
-      <div className="flex-1 flex items-end justify-end text-6xl font-light px-2 mb-4 truncate">
+    <div className="h-full w-full bg-black text-white flex flex-col p-4 select-none min-h-0">
+      <div className="flex-1 flex items-end justify-end text-6xl font-light px-2 mb-4 truncate min-h-[80px]">
         {display}
       </div>
       <div className="grid grid-cols-4 gap-3">

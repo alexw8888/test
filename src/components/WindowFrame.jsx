@@ -86,9 +86,11 @@ const WindowFrame = ({ windowItem }) => {
             </div>
 
             {/* Window Content */}
-            <div className="flex-1 relative overflow-hidden">
+            <div className="flex-1 relative overflow-hidden min-h-0">
               <div className="absolute inset-0 overflow-auto">
-                <AppComponent darkMode={darkMode} />
+                <div className="h-full w-full">
+                  <AppComponent darkMode={darkMode} />
+                </div>
               </div>
             </div>
           </motion.div>
