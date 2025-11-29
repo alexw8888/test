@@ -7,12 +7,14 @@ import TopBar from './TopBar';
 const Desktop = () => {
   const { windows, activeWindowId } = useOSStore();
 
+  // Sort windows by z-index for correct rendering order
+  const sortedWindows = [...windows].sort((a, b) => a.zIndex - b.zIndex);
+
   return (
     <div 
       className="relative w-screen h-screen overflow-hidden bg-cover bg-center font-sans"
       style={{ 
-        backgroundImage: 'url("https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop")',
-        backgroundColor: '#2d3436' 
+        background: 'linear-gradient(135deg, #0a1628 0%, #1a365d 50%, #1e3a5f 100%)',
       }}
     >
       {/* Overlay to darken/tint if needed */}
@@ -21,7 +23,7 @@ const Desktop = () => {
       <TopBar />
 
       <div className="relative w-full h-full pt-8 pb-24 z-0">
-        {windows.map((window) => (
+        {sortedWindows.map((window) => (
           <WindowFrame key={window.id} windowItem={window} />
         ))}
       </div>

@@ -7,7 +7,7 @@ import { apps } from '../utils/appRegistry';
 
 const WindowFrame = ({ windowItem }) => {
   const { id, appId, isMinimized, isMaximized, zIndex, position, size } = windowItem;
-  const { focusWindow, closeWindow, minimizeWindow, maximizeWindow, updateWindowPosition } = useOSStore();
+  const { focusWindow, closeWindow, minimizeWindow, maximizeWindow, updateWindowPosition, darkMode } = useOSStore();
   const nodeRef = useRef(null);
 
   const appConfig = apps[appId];
@@ -43,7 +43,7 @@ const WindowFrame = ({ windowItem }) => {
             exit="exit"
             variants={variants}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="absolute rounded-xl overflow-hidden shadow-mac-window bg-mac-window backdrop-blur-xl border border-white/20 flex flex-col"
+            className={`absolute rounded-xl overflow-hidden shadow-mac-window backdrop-blur-xl border border-white/20 flex flex-col ${darkMode ? 'bg-gray-800' : 'bg-mac-window'}`}
             style={{
               width: isMaximized ? '100%' : size.width,
               height: isMaximized ? '100%' : size.height,
@@ -55,7 +55,7 @@ const WindowFrame = ({ windowItem }) => {
             onMouseDown={handleFocus}
           >
             {/* Window Header */}
-            <div className="window-header h-10 bg-gray-200/50 border-b border-gray-300/30 flex items-center px-4 space-x-2 select-none cursor-default">
+            <div className={`window-header h-10 border-b border-gray-300/30 flex items-center px-4 space-x-2 select-none cursor-grab active:cursor-grabbing ${darkMode ? 'bg-gray-700/50' : 'bg-gray-200/50'}`}>
               <div className="flex space-x-2 group">
                 <button 
                   onClick={(e) => { e.stopPropagation(); closeWindow(id); }}
@@ -76,7 +76,7 @@ const WindowFrame = ({ windowItem }) => {
                   <Maximize2 size={8} className="opacity-0 group-hover:opacity-100 text-black/60" />
                 </button>
               </div>
-              <div className="flex-1 text-center text-sm font-medium text-gray-700 opacity-80">
+              <div className={`flex-1 text-center text-sm font-medium opacity-80 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
                 {appConfig.title}
               </div>
               <div className="w-14"></div> {/* Spacer for centering title */}
@@ -85,7 +85,7 @@ const WindowFrame = ({ windowItem }) => {
             {/* Window Content */}
             <div className="flex-1 relative overflow-hidden">
               <div className="absolute inset-0 overflow-auto">
-                <AppComponent />
+                <AppComponent darkMode={darkMode} />
               </div>
             </div>
           </motion.div>

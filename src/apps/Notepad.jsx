@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const Notepad = () => {
+const Notepad = ({ darkMode }) => {
   const [text, setText] = useState('');
 
   useEffect(() => {
@@ -16,7 +16,11 @@ const Notepad = () => {
 
   return (
     <textarea
-      className="w-full h-full resize-none p-4 outline-none text-gray-800 font-sans text-base bg-white"
+      className={`w-full h-full resize-none p-4 outline-none font-sans text-base ${
+        darkMode 
+          ? 'bg-gray-900 text-gray-100 placeholder-gray-500' 
+          : 'bg-white text-gray-800 placeholder-gray-400'
+      }`}
       value={text}
       onChange={handleChange}
       placeholder="Type something..."
