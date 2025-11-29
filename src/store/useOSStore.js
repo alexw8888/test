@@ -3,42 +3,59 @@ import { create } from 'zustand';
 export const useOSStore = create((set, get) => ({
   activeWindowId: null,
   windows: [],
-  zIndexCounter: 100, // Starting z-index
+  zIndexCounter: 1000, // Starting z-index (higher value for more room)
+  isDarkMode: false, // Dark mode state
+
+  // Get current maximum z-index from all windows
+  getMaxZIndex: () => {
+    const { windows } = get();
+    return windows.length > 0 ? Math.max(...windows.map(w => w.zIndex)) : 1000;
+  },
+
+  // Bring window to front with proper z-index management
+  bringToFront: (windowId) => {
+    const { windows } = get();
+    const maxZ = get().getMaxZIndex();
+    const newZ = maxZ + 1;
+    
+    set({
+      activeWindowId: windowId,
+      zIndexCounter: newZ,
+      windows: windows.map(w => 
+        w.id === windowId 
+          ? { ...w, zIndex: newZ, isMinimized: false }
+          : w
+      ),
+    });
+  },
 
   // Actions
   openApp: (appId) => {
-    const { windows, zIndexCounter } = get();
+    const { windows } = get();
     
     // Check if window is already open
     const existingWindow = windows.find((w) => w.appId === appId);
     
     if (existingWindow) {
       // If minimized, restore it. If just background, bring to front.
-      set({
-        activeWindowId: existingWindow.id,
-        zIndexCounter: zIndexCounter + 1,
-        windows: windows.map((w) => 
-          w.id === existingWindow.id 
-            ? { ...w, isMinimized: false, zIndex: zIndexCounter + 1 }
-            : w
-        ),
-      });
+      get().bringToFront(existingWindow.id);
     } else {
-      // Open new window
+      // Open new window with proper z-index
+      const maxZ = get().getMaxZIndex();
       const newWindow = {
         id: Date.now().toString(),
         appId,
         title: appId, // Will be enriched by the UI layer
-        zIndex: zIndexCounter + 1,
+        zIndex: maxZ + 1,
         isMinimized: false,
         isMaximized: false,
-        position: { x: 100 + (windows.length * 20), y: 50 + (windows.length * 20) }, // Cascade effect
+        position: { x: 100 + (windows.length * 30), y: 50 + (windows.length * 30) }, // Cascade effect
         size: { width: 600, height: 400 },
       };
 
       set({
         activeWindowId: newWindow.id,
-        zIndexCounter: zIndexCounter + 1,
+        zIndexCounter: newWindow.zIndex,
         windows: [...windows, newWindow],
       });
     }
@@ -61,25 +78,23 @@ export const useOSStore = create((set, get) => ({
   },
 
   maximizeWindow: (id) => {
-     set((state) => ({
-      activeWindowId: id,
-      zIndexCounter: state.zIndexCounter + 1,
-      windows: state.windows.map((w) =>
-        w.id === id 
-          ? { ...w, isMaximized: !w.isMaximized, zIndex: state.zIndexCounter + 1 } 
-          : w
-      ),
-    }));
+     set((state) => {
+       const maxZ = get().getMaxZIndex();
+       const newZ = maxZ + 1;
+       return {
+        activeWindowId: id,
+        zIndexCounter: newZ,
+        windows: state.windows.map((w) =>
+          w.id === id 
+            ? { ...w, isMaximized: !w.isMaximized, zIndex: newZ } 
+            : w
+        ),
+      };
+    });
   },
 
   focusWindow: (id) => {
-    set((state) => ({
-      activeWindowId: id,
-      zIndexCounter: state.zIndexCounter + 1,
-      windows: state.windows.map((w) =>
-        w.id === id ? { ...w, zIndex: state.zIndexCounter + 1, isMinimized: false } : w
-      ),
-    }));
+    get().bringToFront(id);
   },
 
   updateWindowPosition: (id, position) => {
@@ -96,5 +111,33 @@ export const useOSStore = create((set, get) => ({
         w.id === id ? { ...w, size } : w
       ),
     }));
+  },
+
+  // Dark mode actions
+  toggleDarkMode: () => {
+    set((state) => ({ isDarkMode: !state.isDarkMode }));
+  },
+
+  // Window ordering and z-index management
+  reorderWindows: () => {
+    set((state) => {
+      const sortedWindows = [...state.windows].sort((a, b) => a.zIndex - b.zIndex);
+      const baseZ = 1000;
+      const reorderedWindows = sortedWindows.map((window, index) => ({
+        ...window,
+        zIndex: baseZ + index,
+      }));
+      
+      return {
+        windows: reorderedWindows,
+        zIndexCounter: baseZ + reorderedWindows.length,
+      };
+    });
+  },
+
+  // Get windows sorted by z-index for proper rendering
+  getWindowsSorted: () => {
+    const { windows } = get();
+    return [...windows].sort((a, b) => a.zIndex - b.zIndex);
   },
 }));

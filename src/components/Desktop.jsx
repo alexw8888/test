@@ -5,14 +5,14 @@ import Dock from './Dock';
 import TopBar from './TopBar';
 
 const Desktop = () => {
-  const { windows, activeWindowId } = useOSStore();
+  const { windows, activeWindowId, getWindowsSorted } = useOSStore();
+  const sortedWindows = getWindowsSorted();
 
   return (
     <div 
       className="relative w-screen h-screen overflow-hidden bg-cover bg-center font-sans"
       style={{ 
-        backgroundImage: 'url("https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop")',
-        backgroundColor: '#2d3436' 
+        background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #1e3c72 100%)'
       }}
     >
       {/* Overlay to darken/tint if needed */}
@@ -20,8 +20,8 @@ const Desktop = () => {
 
       <TopBar />
 
-      <div className="relative w-full h-full pt-8 pb-24 z-0">
-        {windows.map((window) => (
+      <div className="relative w-full h-full pt-9 pb-24 z-0">
+        {sortedWindows.map((window) => (
           <WindowFrame key={window.id} windowItem={window} />
         ))}
       </div>
