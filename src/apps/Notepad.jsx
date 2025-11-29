@@ -16,7 +16,7 @@ const Notepad = () => {
 
   return (
     <textarea
-      className="w-full h-full resize-none p-4 outline-none text-gray-800 font-sans text-base bg-white"
+      className="w-full h-full resize-none p-4 outline-none text-gray-800 dark:text-gray-200 font-sans text-base bg-white dark:bg-gray-900"
       value={text}
       onChange={handleChange}
       placeholder="Type something..."

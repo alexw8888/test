@@ -7,7 +7,7 @@ import { apps } from '../utils/appRegistry';
 
 const WindowFrame = ({ windowItem }) => {
   const { id, appId, isMinimized, isMaximized, zIndex, position, size } = windowItem;
-  const { focusWindow, closeWindow, minimizeWindow, maximizeWindow, updateWindowPosition } = useOSStore();
+  const { focusWindow, closeWindow, minimizeWindow, maximizeWindow, updateWindowPosition, darkMode } = useOSStore();
   const nodeRef = useRef(null);
 
   const appConfig = apps[appId];
@@ -30,11 +30,10 @@ const WindowFrame = ({ windowItem }) => {
       {!isMinimized && (
         <Draggable
           handle=".window-header"
-          defaultPosition={position}
+          position={position}
           onStart={handleFocus}
           onStop={(e, data) => updateWindowPosition(id, { x: data.x, y: data.y })}
           nodeRef={nodeRef}
-          bounds="parent"
         >
           <motion.div
             ref={nodeRef}
@@ -43,7 +42,7 @@ const WindowFrame = ({ windowItem }) => {
             exit="exit"
             variants={variants}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="absolute rounded-xl overflow-hidden shadow-mac-window bg-mac-window backdrop-blur-xl border border-white/20 flex flex-col"
+            className={`absolute rounded-xl overflow-hidden shadow-mac-window bg-white dark:bg-gray-800 backdrop-blur-xl border border-gray-300 dark:border-gray-600 flex flex-col`}
             style={{
               width: isMaximized ? '100%' : size.width,
               height: isMaximized ? '100%' : size.height,
@@ -55,7 +54,7 @@ const WindowFrame = ({ windowItem }) => {
             onMouseDown={handleFocus}
           >
             {/* Window Header */}
-            <div className="window-header h-10 bg-gray-200/50 border-b border-gray-300/30 flex items-center px-4 space-x-2 select-none cursor-default">
+            <div className="window-header h-10 bg-gray-200 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600 flex items-center px-4 space-x-2 select-none cursor-default">
               <div className="flex space-x-2 group">
                 <button 
                   onClick={(e) => { e.stopPropagation(); closeWindow(id); }}
