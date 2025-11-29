@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { apps } from '../utils/appRegistry';
 
 export const useOSStore = create((set, get) => ({
   activeWindowId: null,
@@ -40,17 +41,22 @@ export const useOSStore = create((set, get) => ({
       // If minimized, restore it. If just background, bring to front.
       get().bringToFront(existingWindow.id);
     } else {
+      // Get app configuration for default size
+      const appConfig = apps[appId];
+      
       // Open new window with proper z-index
       const maxZ = get().getMaxZIndex();
+      const initialPosition = { x: 100 + (windows.length * 30), y: 50 + (windows.length * 30) };
       const newWindow = {
         id: Date.now().toString(),
         appId,
-        title: appId, // Will be enriched by the UI layer
+        title: appConfig?.title || appId, // Use app's title from registry
         zIndex: maxZ + 1,
         isMinimized: false,
         isMaximized: false,
-        position: { x: 100 + (windows.length * 30), y: 50 + (windows.length * 30) }, // Cascade effect
-        size: { width: 600, height: 400 },
+        position: initialPosition,
+        previousPosition: initialPosition, // Store initial position for restoration
+        size: appConfig?.defaultSize || { width: 600, height: 400 },
       };
 
       set({
@@ -78,15 +84,22 @@ export const useOSStore = create((set, get) => ({
   },
 
   maximizeWindow: (id) => {
-     set((state) => {
-       const maxZ = get().getMaxZIndex();
-       const newZ = maxZ + 1;
-       return {
+    set((state) => {
+      const maxZ = get().getMaxZIndex();
+      const newZ = maxZ + 1;
+      return {
         activeWindowId: id,
         zIndexCounter: newZ,
         windows: state.windows.map((w) =>
           w.id === id 
-            ? { ...w, isMaximized: !w.isMaximized, zIndex: newZ } 
+            ? { 
+                ...w, 
+                isMaximized: !w.isMaximized, 
+                zIndex: newZ,
+                // Store current position when maximizing, restore when unmaximizing
+                previousPosition: w.isMaximized ? w.previousPosition : w.position,
+                position: w.isMaximized ? (w.previousPosition || { x: 100, y: 50 }) : { x: 0, y: 0 }
+              } 
             : w
         ),
       };

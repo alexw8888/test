@@ -25,7 +25,7 @@ export const apps = {
     title: 'Calculator',
     icon: CalcIcon,
     component: Calculator,
-    defaultSize: { width: 320, height: 450 }
+    defaultSize: { width: 320, height: 490 }
   },
   safari: {
     id: 'safari',
