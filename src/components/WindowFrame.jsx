@@ -1,48 +1,39 @@
 import React, { useRef, useEffect } from 'react';
 import Draggable from 'react-draggable';
-import { motion, AnimatePresence } from 'framer-motion';
+// Removed framer-motion to avoid conflicts with react-draggable transforms
 import { X, Minus, Maximize2 } from 'lucide-react';
 import { useOSStore } from '../store/useOSStore';
 import { apps } from '../utils/appRegistry';
 
 const WindowFrame = ({ windowItem }) => {
   const { id, appId, isMinimized, isMaximized, zIndex, position, size } = windowItem;
-  const { focusWindow, closeWindow, minimizeWindow, maximizeWindow, updateWindowPosition } = useOSStore();
+  const { focusWindow, closeWindow, minimizeWindow, maximizeWindow, updateWindowPosition, darkMode } = useOSStore();
   const nodeRef = useRef(null);
 
   const appConfig = apps[appId];
   const AppComponent = appConfig ? appConfig.component : null;
 
   if (!AppComponent) return null;
+  if (isMinimized) return null;
 
   const handleFocus = () => {
     focusWindow(id);
   };
 
-  const variants = {
-    hidden: { opacity: 0, scale: 0.8, y: 100 },
-    visible: { opacity: 1, scale: 1, y: 0 },
-    exit: { opacity: 0, scale: 0.8, y: 100, transition: { duration: 0.2 } },
-  };
+  // removed animation variants — framer-motion and react-draggable may conflict
 
   return (
-    <AnimatePresence>
-      {!isMinimized && (
         <Draggable
           handle=".window-header"
-          defaultPosition={position}
+          position={{ x: position.x, y: position.y }}
           onStart={handleFocus}
+          onDrag={(e, data) => updateWindowPosition(id, { x: data.x, y: data.y })}
           onStop={(e, data) => updateWindowPosition(id, { x: data.x, y: data.y })}
           nodeRef={nodeRef}
           bounds="parent"
         >
-          <motion.div
+          <div
             ref={nodeRef}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            variants={variants}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className="absolute rounded-xl overflow-hidden shadow-mac-window bg-mac-window backdrop-blur-xl border border-white/20 flex flex-col"
             style={{
               width: isMaximized ? '100%' : size.width,
@@ -55,7 +46,7 @@ const WindowFrame = ({ windowItem }) => {
             onMouseDown={handleFocus}
           >
             {/* Window Header */}
-            <div className="window-header h-10 bg-gray-200/50 border-b border-gray-300/30 flex items-center px-4 space-x-2 select-none cursor-default">
+            <div className={`window-header h-10 ${darkMode ? 'bg-gray-800/40 border-b border-gray-700/40 text-white' : 'bg-gray-200/50 border-b border-gray-300/30 text-gray-700'} flex items-center px-4 space-x-2 select-none cursor-grab active:cursor-grabbing`}>
               <div className="flex space-x-2 group">
                 <button 
                   onClick={(e) => { e.stopPropagation(); closeWindow(id); }}
@@ -88,10 +79,8 @@ const WindowFrame = ({ windowItem }) => {
                 <AppComponent />
               </div>
             </div>
-          </motion.div>
+          </div>
         </Draggable>
-      )}
-    </AnimatePresence>
   );
 };
 

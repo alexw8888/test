@@ -2,7 +2,8 @@ import Terminal from '../apps/Terminal';
 import Notepad from '../apps/Notepad';
 import Calculator from '../apps/Calculator';
 import Safari from '../apps/Safari';
-import { TerminalSquare, StickyNote, Calculator as CalcIcon, Globe, FolderOpen } from 'lucide-react';
+import HelloApp from '../apps/HelloApp';
+import { TerminalSquare, StickyNote, Calculator as CalcIcon, Globe, FolderOpen, Sparkles } from 'lucide-react';
 
 export const apps = {
   terminal: {
@@ -39,6 +40,14 @@ export const apps = {
     icon: FolderOpen,
     component: () => <div className="p-4">Finder is not fully implemented yet.</div>,
     defaultSize: { width: 800, height: 500 }
+  }
+  ,
+  hello: {
+    id: 'hello',
+    title: 'HelloApp',
+    icon: Sparkles,
+    component: HelloApp,
+    defaultSize: { width: 420, height: 320 }
   }
 };
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useOSStore } from '../store/useOSStore';
 
 const Notepad = () => {
   const [text, setText] = useState('');
@@ -14,9 +15,11 @@ const Notepad = () => {
     localStorage.setItem('notepad-content', newText);
   };
 
+  const { darkMode } = useOSStore();
+
   return (
     <textarea
-      className="w-full h-full resize-none p-4 outline-none text-gray-800 font-sans text-base bg-white"
+      className={`w-full h-full resize-none p-4 outline-none text-base ${darkMode ? 'text-white bg-gray-900' : 'text-gray-800 bg-white'} font-sans`}
       value={text}
       onChange={handleChange}
       placeholder="Type something..."

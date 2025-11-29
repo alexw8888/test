@@ -41,8 +41,18 @@ const Calculator = () => {
       setDisplay(String(newValue));
     }
 
-    setWaitingForOperand(true);
-    setOperator(nextOperator);
+    if (nextOperator === '=') {
+      if (operator && prevValue !== null) {
+        const newValue = calculate(prevValue, inputValue, operator);
+        setDisplay(String(newValue));
+        setPrevValue(null);
+      }
+      setOperator(null);
+      setWaitingForOperand(true);
+    } else {
+      setWaitingForOperand(true);
+      setOperator(nextOperator);
+    }
   };
 
   const calculate = (prev, next, op) => {
@@ -66,8 +76,10 @@ const Calculator = () => {
 
   return (
     <div className="h-full w-full bg-black text-white flex flex-col p-4 select-none">
-      <div className="flex-1 flex items-end justify-end text-6xl font-light px-2 mb-4 truncate">
-        {display}
+      <div className="w-full rounded-lg bg-black/30 p-3 mb-4">
+        <div className="flex items-end justify-end text-6xl font-light px-2 truncate">
+          {display}
+        </div>
       </div>
       <div className="grid grid-cols-4 gap-3">
         <Button label="AC" className="bg-gray-400 text-black text-xl" onClick={clear} />

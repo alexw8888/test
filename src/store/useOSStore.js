@@ -4,6 +4,8 @@ export const useOSStore = create((set, get) => ({
   activeWindowId: null,
   windows: [],
   zIndexCounter: 100, // Starting z-index
+  darkMode: false,
+  toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode })),
 
   // Actions
   openApp: (appId) => {
@@ -23,6 +25,8 @@ export const useOSStore = create((set, get) => ({
             : w
         ),
       });
+      // Reorder windows so the focused one is last
+      get().focusWindow(existingWindow.id);
     } else {
       // Open new window
       const newWindow = {
@@ -73,13 +77,18 @@ export const useOSStore = create((set, get) => ({
   },
 
   focusWindow: (id) => {
-    set((state) => ({
-      activeWindowId: id,
-      zIndexCounter: state.zIndexCounter + 1,
-      windows: state.windows.map((w) =>
-        w.id === id ? { ...w, zIndex: state.zIndexCounter + 1, isMinimized: false } : w
-      ),
-    }));
+    set((state) => {
+      const windows = state.windows.filter((w) => w.id !== id);
+      const focusedWindow = state.windows.find((w) => w.id === id);
+      const reordered = windows.concat(focusedWindow || []);
+      // Reassign zIndex based on order to keep them consistent and avoid runaway zIndexCounter
+      const base = 100;
+      const updated = reordered.map((w, idx) => ({ ...w, zIndex: base + idx }));
+      return {
+        activeWindowId: id,
+        windows: updated,
+      };
+    });
   },
 
   updateWindowPosition: (id, position) => {
