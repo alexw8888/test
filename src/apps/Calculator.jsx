@@ -42,7 +42,7 @@ const Calculator = () => {
     }
 
     setWaitingForOperand(true);
-    setOperator(nextOperator);
+    setOperator(nextOperator === '=' ? null : nextOperator);
   };
 
   const calculate = (prev, next, op) => {
@@ -65,20 +65,20 @@ const Calculator = () => {
   );
 
   return (
-    <div className="h-full w-full bg-black text-white flex flex-col p-4 select-none">
-      <div className="flex-1 flex items-end justify-end text-6xl font-light px-2 mb-4 truncate">
-        {display}
+    <div className="h-full w-full bg-gradient-to-b from-black via-gray-900 to-gray-800 text-white flex flex-col p-4 select-none">
+      <div className="bg-black/60 border border-white/10 rounded-xl px-4 py-6 mb-4 shadow-inner min-h-[96px] flex items-end justify-end">
+        <div className="w-full text-right text-5xl font-light leading-none break-words">{display}</div>
       </div>
       <div className="grid grid-cols-4 gap-3">
         <Button label="AC" className="bg-gray-400 text-black text-xl" onClick={clear} />
         <Button label="+/-" className="bg-gray-400 text-black text-xl" onClick={() => setDisplay(String(-parseFloat(display)))} />
         <Button label="%" className="bg-gray-400 text-black text-xl" onClick={() => setDisplay(String(parseFloat(display) / 100))} />
-        <Button label="÷" className="bg-orange-500" onClick={() => performOperation('/')} />
+        <Button label="/" className="bg-orange-500" onClick={() => performOperation('/')} />
 
         <Button label="7" className="bg-gray-700" onClick={() => inputDigit(7)} />
         <Button label="8" className="bg-gray-700" onClick={() => inputDigit(8)} />
         <Button label="9" className="bg-gray-700" onClick={() => inputDigit(9)} />
-        <Button label="×" className="bg-orange-500" onClick={() => performOperation('*')} />
+        <Button label="*" className="bg-orange-500" onClick={() => performOperation('*')} />
 
         <Button label="4" className="bg-gray-700" onClick={() => inputDigit(4)} />
         <Button label="5" className="bg-gray-700" onClick={() => inputDigit(5)} />
