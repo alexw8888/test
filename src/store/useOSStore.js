@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { apps } from '../utils/appRegistry';
 
 export const useOSStore = create((set, get) => ({
   activeWindowId: null,
@@ -33,7 +34,7 @@ export const useOSStore = create((set, get) => ({
         isMinimized: false,
         isMaximized: false,
         position: { x: 100 + (windows.length * 20), y: 50 + (windows.length * 20) }, // Cascade effect
-        size: { width: 600, height: 400 },
+        size: apps[appId]?.defaultSize || { width: 600, height: 400 },
       };
 
       set({
