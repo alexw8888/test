@@ -1,83 +1,108 @@
 import { create } from 'zustand';
+import { apps } from '../utils/appRegistry';
+
+const BASE_Z_INDEX = 100;
+const getStoredTheme = () => {
+  if (typeof window === 'undefined') return 'light';
+  return localStorage.getItem('os-theme') || 'light';
+};
+
+const applyZOrder = (windows) => (
+  windows.map((windowItem, index) => ({
+    ...windowItem,
+    zIndex: BASE_Z_INDEX + index,
+  }))
+);
+
+const moveWindowToFront = (windows, id) => {
+  const target = windows.find((w) => w.id === id);
+  if (!target) return applyZOrder(windows);
+
+  const remaining = windows.filter((w) => w.id !== id);
+  return applyZOrder([...remaining, target]);
+};
 
 export const useOSStore = create((set, get) => ({
   activeWindowId: null,
   windows: [],
-  zIndexCounter: 100, // Starting z-index
+  theme: getStoredTheme(),
 
   // Actions
   openApp: (appId) => {
-    const { windows, zIndexCounter } = get();
+    const { windows } = get();
     
-    // Check if window is already open
     const existingWindow = windows.find((w) => w.appId === appId);
     
     if (existingWindow) {
-      // If minimized, restore it. If just background, bring to front.
-      set({
+      set((state) => ({
         activeWindowId: existingWindow.id,
-        zIndexCounter: zIndexCounter + 1,
-        windows: windows.map((w) => 
-          w.id === existingWindow.id 
-            ? { ...w, isMinimized: false, zIndex: zIndexCounter + 1 }
-            : w
+        windows: moveWindowToFront(
+          state.windows.map((w) =>
+            w.id === existingWindow.id 
+              ? { ...w, isMinimized: false }
+              : w
+          ),
+          existingWindow.id
         ),
-      });
+      }));
     } else {
-      // Open new window
+      const defaultSize = apps[appId]?.defaultSize || { width: 600, height: 400 };
       const newWindow = {
         id: Date.now().toString(),
         appId,
-        title: appId, // Will be enriched by the UI layer
-        zIndex: zIndexCounter + 1,
+        title: appId,
         isMinimized: false,
         isMaximized: false,
-        position: { x: 100 + (windows.length * 20), y: 50 + (windows.length * 20) }, // Cascade effect
-        size: { width: 600, height: 400 },
+        position: { x: 100 + (windows.length * 20), y: 50 + (windows.length * 20) },
+        size: defaultSize,
       };
 
-      set({
+      set((state) => ({
         activeWindowId: newWindow.id,
-        zIndexCounter: zIndexCounter + 1,
-        windows: [...windows, newWindow],
-      });
+        windows: applyZOrder([...state.windows, newWindow]),
+      }));
     }
   },
 
   closeWindow: (id) => {
     set((state) => ({
-      windows: state.windows.filter((w) => w.id !== id),
+      windows: applyZOrder(state.windows.filter((w) => w.id !== id)),
       activeWindowId: state.activeWindowId === id ? null : state.activeWindowId,
     }));
   },
 
   minimizeWindow: (id) => {
     set((state) => ({
-      activeWindowId: null, // Deselect when minimizing
-      windows: state.windows.map((w) =>
+      activeWindowId: state.activeWindowId === id ? null : state.activeWindowId,
+      windows: applyZOrder(state.windows.map((w) =>
         w.id === id ? { ...w, isMinimized: true } : w
-      ),
+      )),
     }));
   },
 
   maximizeWindow: (id) => {
-     set((state) => ({
-      activeWindowId: id,
-      zIndexCounter: state.zIndexCounter + 1,
-      windows: state.windows.map((w) =>
+    set((state) => {
+      const updatedWindows = state.windows.map((w) =>
         w.id === id 
-          ? { ...w, isMaximized: !w.isMaximized, zIndex: state.zIndexCounter + 1 } 
+          ? { ...w, isMaximized: !w.isMaximized, isMinimized: false } 
           : w
-      ),
-    }));
+      );
+
+      return {
+        activeWindowId: id,
+        windows: moveWindowToFront(updatedWindows, id),
+      };
+    });
   },
 
   focusWindow: (id) => {
     set((state) => ({
       activeWindowId: id,
-      zIndexCounter: state.zIndexCounter + 1,
-      windows: state.windows.map((w) =>
-        w.id === id ? { ...w, zIndex: state.zIndexCounter + 1, isMinimized: false } : w
+      windows: moveWindowToFront(
+        state.windows.map((w) =>
+          w.id === id ? { ...w, isMinimized: false } : w
+        ),
+        id
       ),
     }));
   },
@@ -96,5 +121,15 @@ export const useOSStore = create((set, get) => ({
         w.id === id ? { ...w, size } : w
       ),
     }));
+  },
+
+  toggleTheme: () => {
+    set((state) => {
+      const nextTheme = state.theme === 'dark' ? 'light' : 'dark';
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('os-theme', nextTheme);
+      }
+      return { theme: nextTheme };
+    });
   },
 }));
