@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 import Draggable from 'react-draggable';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Minus, Maximize2 } from 'lucide-react';
@@ -8,7 +8,6 @@ import { apps } from '../utils/appRegistry';
 const WindowFrame = ({ windowItem }) => {
   const { id, appId, isMinimized, isMaximized, zIndex, position, size } = windowItem;
   const { focusWindow, closeWindow, minimizeWindow, maximizeWindow, updateWindowPosition, darkMode } = useOSStore();
-  const nodeRef = useRef(null);
 
   const appConfig = apps[appId];
   const AppComponent = appConfig ? appConfig.component : null;
@@ -30,15 +29,14 @@ const WindowFrame = ({ windowItem }) => {
       {!isMinimized && (
         <Draggable
           handle=".window-header"
-          position={position}
+          defaultPosition={position}
           onStart={handleFocus}
           onDrag={(e, data) => updateWindowPosition(id, { x: data.x, y: data.y })}
           onStop={(e, data) => updateWindowPosition(id, { x: data.x, y: data.y })}
-          nodeRef={nodeRef}
           bounds="parent"
+          disabled={isMaximized}
         >
           <motion.div
-            ref={nodeRef}
             initial="hidden"
             animate="visible"
             exit="exit"
@@ -51,7 +49,6 @@ const WindowFrame = ({ windowItem }) => {
               zIndex: zIndex,
               left: isMaximized ? 0 : undefined, // Override draggable position if maximized
               top: isMaximized ? 0 : undefined,
-              transform: isMaximized ? 'none !important' : undefined, // Force transform reset if maximized (tricky with draggable)
             }}
             onMouseDown={handleFocus}
           >
